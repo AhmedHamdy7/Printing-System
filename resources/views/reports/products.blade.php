@@ -48,13 +48,13 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->total_quantity }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($product->total_revenue, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($product->total_revenue, 2) }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50 font-semibold">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TOTAL</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $productSales->sum('total_quantity') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($productSales->sum('total_revenue'), 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($productSales->sum('total_revenue'), 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

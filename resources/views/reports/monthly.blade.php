@@ -26,7 +26,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-sm font-medium text-gray-500">Total Income</h3>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">${{ number_format($income, 2) }}</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">EGP {{ number_format($income, 2) }}</p>
                     </div>
                 </div>
 
@@ -53,7 +53,7 @@
                                 @foreach($dailyIncome as $day)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ date('F d, Y', strtotime($day->date)) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($day->total, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($day->total, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -109,9 +109,9 @@
             @foreach($invoice->items as $item)
                 <tr>
                     <td>{{ $item->product->name }}</td>
-                    <td style="text-align: right;">${{ number_format($item->unit_price, 2) }}</td>
+                    <td style="text-align: right;">EGP {{ number_format($item->unit_price, 2) }}</td>
                     <td style="text-align: right;">{{ $item->quantity }}</td>
-                    <td style="text-align: right;">${{ number_format($item->total_price, 2) }}</td>
+                    <td style="text-align: right;">EGP {{ number_format($item->total_price, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -121,17 +121,17 @@
         <table>
             <tr>
                 <td>Subtotal:</td>
-                <td style="text-align: right;">${{ number_format($invoice->subtotal, 2) }}</td>
+                <td style="text-align: right;">EGP {{ number_format($invoice->subtotal, 2) }}</td>
             </tr>
             @if($invoice->discount > 0)
                 <tr>
                     <td>Discount:</td>
-                    <td style="text-align: right; color: red;">-${{ number_format($invoice->discount, 2) }}</td>
+                    <td style="text-align: right; color: red;">-EGP {{ number_format($invoice->discount, 2) }}</td>
                 </tr>
             @endif
             <tr class="total-row">
                 <td>Total:</td>
-                <td style="text-align: right;">${{ number_format($invoice->total, 2) }}</td>
+                <td style="text-align: right;">EGP {{ number_format($invoice->total, 2) }}</td>
             </tr>
         </table>
     </div>

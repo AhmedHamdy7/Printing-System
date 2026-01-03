@@ -56,7 +56,7 @@
                                             <option value="">Select a product</option>
                                             @foreach($products as $product)
                                                 <option value="{{ $product->id }}" data-price="{{ $product->price }}">
-                                                    {{ $product->name }} - ${{ number_format($product->price, 2) }}
+                                                    {{ $product->name }} - EGP {{ number_format($product->price, 2) }}
                                                 </option>
                                             @endforeach
                                         </select>

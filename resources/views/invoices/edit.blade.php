@@ -48,7 +48,7 @@
                                             <select name="products[{{ $index }}][product_id]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                                 @foreach($products as $product)
                                                     <option value="{{ $product->id }}" {{ $item->product_id == $product->id ? 'selected' : '' }}>
-                                                        {{ $product->name }} - ${{ number_format($product->price, 2) }}
+                                                        {{ $product->name }} - EGP {{ number_format($product->price, 2) }}
                                                     </option>
                                                 @endforeach
                                             </select>
