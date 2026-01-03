@@ -1,59 +1,250 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Printing Shop Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A complete printing shop management system built with Laravel 12, featuring role-based access control, invoice management, product catalog, and comprehensive reporting.
 
-## About Laravel
+**Company:** Qeematech
+**Assigned To:** Mustafa Fahmy
+**Prepared By:** Eng. Mohamed Abdelrahman
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Authentication & Authorization**
+  - Role-based access control (Admin, Employee)
+  - Permission-based actions using Spatie Permission package
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **User Management** (Admin only)
+  - Create, edit, delete users
+  - Assign roles to users
+  - View all system users
 
-## Learning Laravel
+- **Product Management** (Admin only)
+  - Add, edit, delete products
+  - Set product prices
+  - Enable/disable products
+  - Soft delete support
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Invoice System**
+  - Create print orders with multiple products
+  - Customer information management
+  - Automatic invoice numbering
+  - Apply discounts
+  - Generate PDF invoices
+  - Admin can view all invoices
+  - Employees can view only their own invoices
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Reports** (Admin only)
+  - Daily income reports
+  - Monthly income reports
+  - Product sales statistics
+  - Employee performance reports
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Framework:** Laravel 12
+- **Frontend:** Blade Templates
+- **Database:** MySQL
+- **Packages:**
+  - `spatie/laravel-permission` - Roles & Permissions
+  - `spatie/laravel-query-builder` - Advanced Query Building
+  - `barryvdh/laravel-dompdf` - PDF Generation
+  - `laravel/breeze` - Authentication
 
-### Premium Partners
+## Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
 
-## Contributing
+- PHP >= 8.2
+- Composer
+- MySQL
+- Node.js & NPM
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Steps
 
-## Code of Conduct
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd printing-system
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Install PHP dependencies**
+```bash
+composer install
+```
 
-## Security Vulnerabilities
+3. **Install NPM dependencies**
+```bash
+npm install --legacy-peer-deps
+npm run build
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+5. **Configure database**
+Edit `.env` file:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=printing_system
+DB_USERNAME=root
+DB_PASSWORD=your_password
+```
+
+6. **Create database**
+```bash
+mysql -u root -p
+CREATE DATABASE printing_system;
+exit;
+```
+
+7. **Run migrations and seeders**
+```bash
+php artisan migrate --seed
+```
+
+8. **Start the development server**
+```bash
+php artisan serve
+```
+
+Visit: `http://localhost:8000`
+
+## Default Users
+
+After running seeders, you can login with:
+
+**Admin Account:**
+- Email: `admin@printing.com`
+- Password: `password`
+
+**Employee Account:**
+- Email: `employee@printing.com`
+- Password: `password`
+
+## Roles & Permissions
+
+### Admin Role
+- manage-users
+- manage-roles
+- manage-products
+- view-all-invoices
+- create-invoices
+- view-own-invoices
+- generate-reports
+
+### Employee Role
+- create-invoices
+- view-own-invoices
+
+## Database Structure
+
+### Main Tables
+
+1. **users** - System users
+2. **roles** - User roles (admin, employee)
+3. **permissions** - Available permissions
+4. **products** - Product catalog
+5. **invoices** - Customer invoices
+6. **invoice_items** - Invoice line items
+
+## API Response Helper
+
+The system includes a unified response helper class located at `app/Helpers/ApiResponse.php` for consistent JSON responses:
+
+```php
+ApiResponse::success($data, $message, $code);
+ApiResponse::error($message, $errors, $code);
+ApiResponse::created($data, $message);
+ApiResponse::notFound($message);
+```
+
+## Form Request Validation
+
+All controllers use Form Request classes for clean validation:
+
+- `StoreProductRequest` / `UpdateProductRequest`
+- `StoreInvoiceRequest` / `UpdateInvoiceRequest`
+- `StoreUserRequest` / `UpdateUserRequest`
+
+## PDF Generation
+
+Invoices can be exported as PDF using:
+```
+GET /invoices/{invoice}/pdf
+```
+
+## Query Builder
+
+The system uses Spatie Query Builder for advanced filtering and sorting:
+
+**Example:**
+```
+GET /products?filter[name]=paper&sort=-price
+```
+
+## Error Handling
+
+All controllers implement try-catch blocks for proper error handling and user-friendly error messages.
+
+## Project Structure
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── ProductController.php
+│   │   ├── UserController.php
+│   │   ├── InvoiceController.php
+│   │   └── ReportController.php
+│   └── Requests/
+│       ├── StoreProductRequest.php
+│       ├── UpdateProductRequest.php
+│       ├── StoreInvoiceRequest.php
+│       ├── UpdateInvoiceRequest.php
+│       ├── StoreUserRequest.php
+│       └── UpdateUserRequest.php
+├── Models/
+│   ├── User.php
+│   ├── Product.php
+│   ├── Invoice.php
+│   └── InvoiceItem.php
+└── Helpers/
+    └── ApiResponse.php
+```
+
+## Development
+
+### Running Tests
+```bash
+php artisan test
+```
+
+### Code Style
+```bash
+./vendor/bin/pint
+```
+
+### Clear Cache
+```bash
+php artisan optimize:clear
+```
+
+## Security
+
+- All forms protected with CSRF tokens
+- SQL injection prevention through Eloquent ORM
+- XSS protection through Blade templating
+- Password hashing using bcrypt
+- Role-based authorization on all sensitive routes
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is proprietary software developed for Qeematech.
+
+## Support
+
+For support or questions, contact: Eng. Mohamed Abdelrahman
