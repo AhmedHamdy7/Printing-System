@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Repositories\UserRepository;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Spatie\Permission\Models\Role;
@@ -10,6 +10,13 @@ use Exception;
 
 class UserController extends Controller
 {
+    protected $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function index()
     {
         try {
@@ -17,7 +24,7 @@ class UserController extends Controller
                 abort(403, 'Unauthorized action.');
             }
 
-            $users = User::with('roles')->paginate(10);
+            $users = $this->userRepository->getAllWithRoles();
             return view('users.index', compact('users'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -45,7 +52,7 @@ class UserController extends Controller
         try {
             $validated = $request->validated();
 
-            $user = User::create([
+            $user = $this->userRepository->create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => $validated['password'],
@@ -62,14 +69,14 @@ class UserController extends Controller
         }
     }
 
-    public function show(User $user)
+    public function show($id)
     {
         try {
             if (!auth()->user()->hasRole('admin')) {
                 abort(403, 'Unauthorized action.');
             }
 
-            $user->load('roles');
+            $user = $this->userRepository->findWithRoles($id);
             return view('users.show', compact('user'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -77,15 +84,15 @@ class UserController extends Controller
         }
     }
 
-    public function edit(User $user)
+    public function edit($id)
     {
         try {
             if (!auth()->user()->hasRole('admin')) {
                 abort(403, 'Unauthorized action.');
             }
 
+            $user = $this->userRepository->findWithRoles($id);
             $roles = Role::all();
-            $user->load('roles');
             return view('users.edit', compact('user', 'roles'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -93,7 +100,7 @@ class UserController extends Controller
         }
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateUserRequest $request, $id)
     {
         try {
             $validated = $request->validated();
@@ -107,7 +114,7 @@ class UserController extends Controller
                 $updateData['password'] = $validated['password'];
             }
 
-            $user->update($updateData);
+            $user = $this->userRepository->update($id, $updateData);
             $user->syncRoles([$validated['role']]);
 
             return redirect()->route('users.index')
@@ -119,19 +126,19 @@ class UserController extends Controller
         }
     }
 
-    public function destroy(User $user)
+    public function destroy($id)
     {
         try {
             if (!auth()->user()->hasRole('admin')) {
                 abort(403, 'Unauthorized action.');
             }
 
-            if ($user->id === auth()->id()) {
+            if ($id == auth()->id()) {
                 return redirect()->route('users.index')
                     ->with('error', 'You cannot delete yourself.');
             }
 
-            $user->delete();
+            $this->userRepository->delete($id);
 
             return redirect()->route('users.index')
                 ->with('success', 'User deleted successfully.');

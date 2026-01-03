@@ -59,9 +59,9 @@
                                 @foreach($invoice->items as $item)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->product->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($item->unit_price, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($item->unit_price, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->quantity }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($item->total_price, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($item->total_price, 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -72,17 +72,17 @@
                         <div class="w-full md:w-1/3">
                             <div class="flex justify-between py-2 border-b">
                                 <span class="text-gray-600">Subtotal:</span>
-                                <span class="font-medium text-gray-900">${{ number_format($invoice->subtotal, 2) }}</span>
+                                <span class="font-medium text-gray-900">EGP {{ number_format($invoice->subtotal, 2) }}</span>
                             </div>
                             @if($invoice->discount > 0)
                                 <div class="flex justify-between py-2 border-b">
                                     <span class="text-gray-600">Discount:</span>
-                                    <span class="font-medium text-red-600">-${{ number_format($invoice->discount, 2) }}</span>
+                                    <span class="font-medium text-red-600">-EGP {{ number_format($invoice->discount, 2) }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between py-2 text-lg font-semibold">
                                 <span class="text-gray-900">Total:</span>
-                                <span class="text-gray-900">${{ number_format($invoice->total, 2) }}</span>
+                                <span class="text-gray-900">EGP {{ number_format($invoice->total, 2) }}</span>
                             </div>
                         </div>
                     </div>

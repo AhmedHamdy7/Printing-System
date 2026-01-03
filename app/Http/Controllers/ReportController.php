@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use App\Models\User;
+use App\Services\ReportService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Exception;
 
 class ReportController extends Controller
 {
+    protected $reportService;
+
+    public function __construct(ReportService $reportService)
+    {
+        $this->reportService = $reportService;
+    }
+
     public function index()
     {
         try {
@@ -36,14 +41,9 @@ class ReportController extends Controller
             ]);
 
             $date = $validated['date'] ?? now()->toDateString();
+            $data = $this->reportService->getDailyReport($date);
 
-            $income = Invoice::whereDate('created_at', $date)->sum('total');
-            $invoicesCount = Invoice::whereDate('created_at', $date)->count();
-            $invoices = Invoice::with(['user', 'items.product'])
-                ->whereDate('created_at', $date)
-                ->get();
-
-            return view('reports.daily', compact('income', 'invoicesCount', 'invoices', 'date'));
+            return view('reports.daily', $data);
         } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to generate daily report: ' . $e->getMessage());
@@ -62,19 +62,9 @@ class ReportController extends Controller
             ]);
 
             $month = $validated['month'] ?? now()->format('Y-m');
-            $monthStart = date('Y-m-01', strtotime($month));
-            $monthEnd = date('Y-m-t', strtotime($month));
+            $data = $this->reportService->getMonthlyReport($month);
 
-            $income = Invoice::whereBetween('created_at', [$monthStart, $monthEnd])->sum('total');
-            $invoicesCount = Invoice::whereBetween('created_at', [$monthStart, $monthEnd])->count();
-
-            $dailyIncome = Invoice::whereBetween('created_at', [$monthStart, $monthEnd])
-                ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total) as total'))
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
-
-            return view('reports.monthly', compact('income', 'invoicesCount', 'dailyIncome', 'month'));
+            return view('reports.monthly', $data);
         } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to generate monthly report: ' . $e->getMessage());
@@ -96,21 +86,9 @@ class ReportController extends Controller
             $startDate = $validated['start_date'] ?? now()->subMonth()->toDateString();
             $endDate = $validated['end_date'] ?? now()->toDateString();
 
-            $productSales = DB::table('invoice_items')
-                ->join('products', 'invoice_items.product_id', '=', 'products.id')
-                ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
-                ->whereBetween('invoices.created_at', [$startDate, $endDate])
-                ->select(
-                    'products.id',
-                    'products.name',
-                    DB::raw('SUM(invoice_items.quantity) as total_quantity'),
-                    DB::raw('SUM(invoice_items.total_price) as total_revenue')
-                )
-                ->groupBy('products.id', 'products.name')
-                ->orderByDesc('total_revenue')
-                ->get();
+            $data = $this->reportService->getProductSalesReport($startDate, $endDate);
 
-            return view('reports.products', compact('productSales', 'startDate', 'endDate'));
+            return view('reports.products', $data);
         } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to generate products report: ' . $e->getMessage());
@@ -132,21 +110,9 @@ class ReportController extends Controller
             $startDate = $validated['start_date'] ?? now()->subMonth()->toDateString();
             $endDate = $validated['end_date'] ?? now()->toDateString();
 
-            $employeeSales = User::withCount([
-                'invoices' => function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
-                }
-            ])
-            ->withSum([
-                'invoices' => function ($query) use ($startDate, $endDate) {
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
-                }
-            ], 'total')
-            ->having('invoices_count', '>', 0)
-            ->orderByDesc('invoices_sum_total')
-            ->get();
+            $data = $this->reportService->getEmployeesReport($startDate, $endDate);
 
-            return view('reports.employees', compact('employeeSales', 'startDate', 'endDate'));
+            return view('reports.employees', $data);
         } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to generate employees report: ' . $e->getMessage());

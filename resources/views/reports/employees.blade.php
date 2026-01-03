@@ -50,13 +50,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $employee->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $employee->email }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $employee->invoices_count }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($employee->invoices_sum_total ?? 0, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($employee->invoices_sum_total ?? 0, 2) }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="bg-gray-50 font-semibold">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" colspan="2">TOTAL</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $employeeSales->sum('invoices_count') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($employeeSales->sum('invoices_sum_total'), 2) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">EGP {{ number_format($employeeSales->sum('invoices_sum_total'), 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

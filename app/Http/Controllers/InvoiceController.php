@@ -2,31 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
-use App\Models\Product;
+use App\Repositories\InvoiceRepository;
+use App\Repositories\ProductRepository;
+use App\Services\InvoiceService;
+use App\Services\PdfService;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
-use Illuminate\Support\Facades\DB;
-use Spatie\QueryBuilder\QueryBuilder;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 
 class InvoiceController extends Controller
 {
+    protected $invoiceRepository;
+    protected $productRepository;
+    protected $invoiceService;
+    protected $pdfService;
+
+    public function __construct(
+        InvoiceRepository $invoiceRepository,
+        ProductRepository $productRepository,
+        InvoiceService $invoiceService,
+        PdfService $pdfService
+    ) {
+        $this->invoiceRepository = $invoiceRepository;
+        $this->productRepository = $productRepository;
+        $this->invoiceService = $invoiceService;
+        $this->pdfService = $pdfService;
+    }
     public function index()
     {
         try {
-            $query = Invoice::with(['user', 'items.product']);
-
-            if (auth()->user()->hasRole('employee')) {
-                $query->where('user_id', auth()->id());
-            }
-
-            $invoices = QueryBuilder::for($query)
-                ->allowedFilters(['invoice_number', 'customer_name'])
-                ->allowedSorts(['created_at', 'total'])
-                ->latest()
-                ->paginate(10);
+            $userId = auth()->user()->hasRole('employee') ? auth()->id() : null;
+            $invoices = $this->invoiceRepository->getAllWithFilters($userId);
 
             return view('invoices.index', compact('invoices'));
         } catch (Exception $e) {
@@ -38,7 +44,7 @@ class InvoiceController extends Controller
     public function create()
     {
         try {
-            $products = Product::where('is_active', true)->get();
+            $products = $this->productRepository->getActive();
             return view('invoices.create', compact('products'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -49,41 +55,10 @@ class InvoiceController extends Controller
     public function store(StoreInvoiceRequest $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                $validated = $request->validated();
-                $subtotal = 0;
-                $products = [];
-
-                foreach ($validated['products'] as $item) {
-                    $product = Product::findOrFail($item['product_id']);
-                    $quantity = $item['quantity'];
-                    $total = $product->price * $quantity;
-                    $subtotal += $total;
-
-                    $products[] = [
-                        'product_id' => $product->id,
-                        'quantity' => $quantity,
-                        'unit_price' => $product->price,
-                        'total_price' => $total,
-                    ];
-                }
-
-                $discount = $validated['discount'] ?? 0;
-                $total = $subtotal - $discount;
-
-                $invoice = Invoice::create([
-                    'user_id' => auth()->id(),
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'customer_email' => $validated['customer_email'] ?? null,
-                    'subtotal' => $subtotal,
-                    'discount' => $discount,
-                    'total' => $total,
-                    'notes' => $validated['notes'] ?? null,
-                ]);
-
-                $invoice->items()->createMany($products);
-            });
+            $this->invoiceService->createInvoice(
+                $request->validated(),
+                auth()->id()
+            );
 
             return redirect()->route('invoices.index')
                 ->with('success', 'Invoice created successfully.');
@@ -94,14 +69,15 @@ class InvoiceController extends Controller
         }
     }
 
-    public function show(Invoice $invoice)
+    public function show($id)
     {
         try {
-            if (auth()->user()->hasRole('employee') && $invoice->user_id !== auth()->id()) {
+            $invoice = $this->invoiceRepository->findWithRelations($id);
+
+            if (!$this->invoiceService->canUserAccessInvoice(auth()->user(), $invoice)) {
                 abort(403, 'Unauthorized action.');
             }
 
-            $invoice->load(['user', 'items.product']);
             return view('invoices.show', compact('invoice'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -109,15 +85,16 @@ class InvoiceController extends Controller
         }
     }
 
-    public function edit(Invoice $invoice)
+    public function edit($id)
     {
         try {
-            if (auth()->user()->hasRole('employee') && $invoice->user_id !== auth()->id()) {
+            $invoice = $this->invoiceRepository->findWithRelations($id);
+
+            if (!$this->invoiceService->canUserAccessInvoice(auth()->user(), $invoice)) {
                 abort(403, 'Unauthorized action.');
             }
 
-            $products = Product::where('is_active', true)->get();
-            $invoice->load('items.product');
+            $products = $this->productRepository->getActive();
             return view('invoices.edit', compact('invoice', 'products'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -125,44 +102,16 @@ class InvoiceController extends Controller
         }
     }
 
-    public function update(UpdateInvoiceRequest $request, Invoice $invoice)
+    public function update(UpdateInvoiceRequest $request, $id)
     {
         try {
-            DB::transaction(function () use ($request, $invoice) {
-                $validated = $request->validated();
-                $subtotal = 0;
-                $products = [];
+            $invoice = $this->invoiceRepository->findOrFail($id);
 
-                foreach ($validated['products'] as $item) {
-                    $product = Product::findOrFail($item['product_id']);
-                    $quantity = $item['quantity'];
-                    $total = $product->price * $quantity;
-                    $subtotal += $total;
+            if (!$this->invoiceService->canUserAccessInvoice(auth()->user(), $invoice)) {
+                abort(403, 'Unauthorized action.');
+            }
 
-                    $products[] = [
-                        'product_id' => $product->id,
-                        'quantity' => $quantity,
-                        'unit_price' => $product->price,
-                        'total_price' => $total,
-                    ];
-                }
-
-                $discount = $validated['discount'] ?? 0;
-                $total = $subtotal - $discount;
-
-                $invoice->update([
-                    'customer_name' => $validated['customer_name'],
-                    'customer_phone' => $validated['customer_phone'] ?? null,
-                    'customer_email' => $validated['customer_email'] ?? null,
-                    'subtotal' => $subtotal,
-                    'discount' => $discount,
-                    'total' => $total,
-                    'notes' => $validated['notes'] ?? null,
-                ]);
-
-                $invoice->items()->delete();
-                $invoice->items()->createMany($products);
-            });
+            $this->invoiceService->updateInvoice($id, $request->validated());
 
             return redirect()->route('invoices.index')
                 ->with('success', 'Invoice updated successfully.');
@@ -173,14 +122,16 @@ class InvoiceController extends Controller
         }
     }
 
-    public function destroy(Invoice $invoice)
+    public function destroy($id)
     {
         try {
-            if (auth()->user()->hasRole('employee') && $invoice->user_id !== auth()->id()) {
+            $invoice = $this->invoiceRepository->findOrFail($id);
+
+            if (!$this->invoiceService->canUserAccessInvoice(auth()->user(), $invoice)) {
                 abort(403, 'Unauthorized action.');
             }
 
-            $invoice->delete();
+            $this->invoiceRepository->delete($id);
 
             return redirect()->route('invoices.index')
                 ->with('success', 'Invoice deleted successfully.');
@@ -190,17 +141,16 @@ class InvoiceController extends Controller
         }
     }
 
-    public function pdf(Invoice $invoice)
+    public function pdf($id)
     {
         try {
-            if (auth()->user()->hasRole('employee') && $invoice->user_id !== auth()->id()) {
+            $invoice = $this->invoiceRepository->findOrFail($id);
+
+            if (!$this->invoiceService->canUserAccessInvoice(auth()->user(), $invoice)) {
                 abort(403, 'Unauthorized action.');
             }
 
-            $invoice->load(['user', 'items.product']);
-            $pdf = Pdf::loadView('invoices.pdf', compact('invoice'));
-
-            return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+            return $this->pdfService->generateInvoicePdf($invoice);
         } catch (Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to generate PDF: ' . $e->getMessage());

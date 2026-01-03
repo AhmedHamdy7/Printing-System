@@ -86,7 +86,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-600">My Revenue</p>
-                                    <p class="text-2xl font-semibold text-gray-900">${{ number_format($myRevenue, 2) }}</p>
+                                    <p class="text-2xl font-semibold text-gray-900">EGP {{ number_format($myRevenue, 2) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -119,7 +119,7 @@
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-gray-600">Today's Revenue</p>
-                                <p class="text-2xl font-semibold text-gray-900">${{ number_format($todayRevenue, 2) }}</p>
+                                <p class="text-2xl font-semibold text-gray-900">EGP {{ number_format($todayRevenue, 2) }}</p>
                             </div>
                         </div>
                     </div>
@@ -163,12 +163,12 @@
                             </div>
                             <div class="flex justify-between items-center pb-2 border-b">
                                 <span class="text-gray-600">Revenue Today</span>
-                                <span class="font-semibold text-gray-900">${{ number_format($todayRevenue, 2) }}</span>
+                                <span class="font-semibold text-gray-900">EGP {{ number_format($todayRevenue, 2) }}</span>
                             </div>
                             @if($todayInvoices > 0)
                                 <div class="flex justify-between items-center">
                                     <span class="text-gray-600">Average Invoice</span>
-                                    <span class="font-semibold text-gray-900">${{ number_format($todayRevenue / $todayInvoices, 2) }}</span>
+                                    <span class="font-semibold text-gray-900">EGP {{ number_format($todayRevenue / $todayInvoices, 2) }}</span>
                                 </div>
                             @endif
                         </div>

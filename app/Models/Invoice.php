@@ -40,6 +40,31 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeToday($query)
+    {
+        return $query->whereDate('created_at', now()->toDateString());
+    }
+
+    public function scopeForDate($query, $date)
+    {
+        return $query->whereDate('created_at', $date);
+    }
+
+    public function scopeBetweenDates($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
+    }
+
+    public function scopeWithRelations($query)
+    {
+        return $query->with(['user', 'items.product']);
+    }
+
     protected static function boot()
     {
         parent::boot();

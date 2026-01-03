@@ -2,22 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Repositories\ProductRepository;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use Spatie\QueryBuilder\QueryBuilder;
 use Exception;
 
 class ProductController extends Controller
 {
+    protected $productRepository;
+
+    public function __construct(ProductRepository $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
+
     public function index()
     {
         try {
-            $products = QueryBuilder::for(Product::class)
-                ->allowedFilters(['name', 'is_active'])
-                ->allowedSorts(['name', 'price', 'created_at'])
-                ->paginate(10);
-
+            $products = $this->productRepository->getAllWithFilters();
             return view('products.index', compact('products'));
         } catch (Exception $e) {
             return redirect()->back()
@@ -33,7 +35,7 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         try {
-            Product::create($request->validated());
+            $this->productRepository->create($request->validated());
 
             return redirect()->route('products.index')
                 ->with('success', 'Product created successfully.');
@@ -44,20 +46,32 @@ class ProductController extends Controller
         }
     }
 
-    public function show(Product $product)
-    {
-        return view('products.show', compact('product'));
-    }
-
-    public function edit(Product $product)
-    {
-        return view('products.edit', compact('product'));
-    }
-
-    public function update(UpdateProductRequest $request, Product $product)
+    public function show($id)
     {
         try {
-            $product->update($request->validated());
+            $product = $this->productRepository->findOrFail($id);
+            return view('products.show', compact('product'));
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to load product: ' . $e->getMessage());
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            $product = $this->productRepository->findOrFail($id);
+            return view('products.edit', compact('product'));
+        } catch (Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to load product: ' . $e->getMessage());
+        }
+    }
+
+    public function update(UpdateProductRequest $request, $id)
+    {
+        try {
+            $this->productRepository->update($id, $request->validated());
 
             return redirect()->route('products.index')
                 ->with('success', 'Product updated successfully.');
@@ -68,10 +82,10 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy(Product $product)
+    public function destroy($id)
     {
         try {
-            $product->delete();
+            $this->productRepository->delete($id);
 
             return redirect()->route('products.index')
                 ->with('success', 'Product deleted successfully.');

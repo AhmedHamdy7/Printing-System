@@ -2,9 +2,12 @@
 
 A complete printing shop management system built with Laravel 12, featuring role-based access control, invoice management, product catalog, and comprehensive reporting.
 
+**GitHub Repository:** [https://github.com/AhmedHamdy7/Printing-System](https://github.com/AhmedHamdy7/Printing-System)
+
 **Company:** Qeematech
-**Assigned To:** Mustafa Fahmy
+**Developer:** Mustafa Fahmy
 **Prepared By:** Eng. Mohamed Abdelrahman
+
 
 ## Features
 
@@ -62,8 +65,8 @@ A complete printing shop management system built with Laravel 12, featuring role
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd printing-system
+git clone https://github.com/AhmedHamdy7/Printing-System.git
+cd Printing-System
 ```
 
 2. **Install PHP dependencies**
@@ -190,38 +193,108 @@ GET /products?filter[name]=paper&sort=-price
 
 All controllers implement try-catch blocks for proper error handling and user-friendly error messages.
 
+## Architecture
+
+This project follows **Clean Code principles** with a **Service Layer** and **Repository Pattern** for better separation of concerns and testability.
+
+### Layered Architecture
+
+```
+Controller → Service → Repository → Model → Database
+```
+
+**Benefits:**
+- **Thin Controllers**: Controllers only handle HTTP requests/responses
+- **Reusable Business Logic**: Services can be used across different parts of the application
+- **Testable Code**: Easy to unit test services and repositories
+- **Maintainable**: Changes to business logic don't affect controllers
+- **DRY Principle**: No code duplication
+
 ## Project Structure
 
 ```
 app/
 ├── Http/
-│   ├── Controllers/
+│   ├── Controllers/          # Handle HTTP requests/responses only
 │   │   ├── ProductController.php
 │   │   ├── UserController.php
 │   │   ├── InvoiceController.php
 │   │   └── ReportController.php
-│   └── Requests/
+│   └── Requests/             # Form validation
 │       ├── StoreProductRequest.php
 │       ├── UpdateProductRequest.php
 │       ├── StoreInvoiceRequest.php
 │       ├── UpdateInvoiceRequest.php
 │       ├── StoreUserRequest.php
 │       └── UpdateUserRequest.php
-├── Models/
+├── Services/                 # Business logic layer
+│   ├── InvoiceService.php   # Invoice calculations & operations
+│   ├── ReportService.php    # Report generation logic
+│   └── PdfService.php       # PDF generation
+├── Repositories/             # Data access layer
+│   ├── BaseRepository.php   # Base repository with common methods
+│   ├── ProductRepository.php
+│   ├── InvoiceRepository.php
+│   └── UserRepository.php
+├── Models/                   # Eloquent models with relationships & scopes
 │   ├── User.php
 │   ├── Product.php
 │   ├── Invoice.php
 │   └── InvoiceItem.php
-└── Helpers/
-    └── ApiResponse.php
+├── Helpers/
+│   └── ApiResponse.php
+└── Providers/
+    └── AppServiceProvider.php  # Service & Repository bindings
+```
+
+## Clean Code Features
+
+### 1. Service Layer
+Handles all business logic:
+```php
+// InvoiceService
+- calculateInvoiceTotals()    // Calculate subtotal, discount, total
+- createInvoice()              // Create invoice with transaction
+- updateInvoice()              // Update invoice with transaction
+- canUserAccessInvoice()       // Authorization logic
+```
+
+### 2. Repository Pattern
+Handles all database queries:
+```php
+// ProductRepository
+- getAllWithFilters()          // Get products with filtering & sorting
+- getActive()                  // Get only active products
+
+// InvoiceRepository
+- getAllWithFilters()          // Get invoices with role-based filtering
+- findWithRelations()          // Get invoice with related data
+- getForDate()                 // Get invoices for specific date
+```
+
+### 3. Model Scopes
+Reusable query constraints:
+```php
+// Product Model
+Product::active()->get()       // Get active products
+Product::inactive()->get()     // Get inactive products
+
+// Invoice Model
+Invoice::forUser($userId)      // Filter by user
+Invoice::forDate($date)        // Filter by date
+Invoice::betweenDates($start, $end)
+Invoice::withRelations()       // Eager load relations
+```
+
+### 4. Configuration
+Centralized settings in `config/printing.php`:
+```php
+- pagination_limit             // Default pagination
+- invoice.number_format        // Invoice number format
+- invoice.pdf_settings         // PDF generation settings
 ```
 
 ## Development
-
-### Running Tests
-```bash
-php artisan test
-```
 
 ### Code Style
 ```bash
@@ -241,10 +314,20 @@ php artisan optimize:clear
 - Password hashing using bcrypt
 - Role-based authorization on all sensitive routes
 
-## License
+---
 
-This project is proprietary software developed for Qeematech.
+## Project Information
 
-## Support
+**GitHub:** [https://github.com/AhmedHamdy7/Printing-System](https://github.com/AhmedHamdy7/Printing-System)
 
-For support or questions, contact: Eng. Mohamed Abdelrahman
+**Company:** Qeematech
+**Developer:** Mustafa Fahmy
+**Prepared By:** Eng. Mohamed Abdelrahman
+
+**License:** Proprietary software developed for Qeematech
+
+---
+
+For support or questions, contact: **Eng. Mohamed Abdelrahman**
+
+

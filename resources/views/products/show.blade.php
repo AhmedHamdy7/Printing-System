@@ -27,7 +27,7 @@
 
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Price</h3>
-                            <p class="mt-1 text-lg text-gray-900">${{ number_format($product->price, 2) }}</p>
+                            <p class="mt-1 text-lg text-gray-900">EGP {{ number_format($product->price, 2) }}</p>
                         </div>
 
                         <div>
