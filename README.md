@@ -4,10 +4,6 @@ A complete printing shop management system built with Laravel 12, featuring role
 
 **GitHub Repository:** [https://github.com/AhmedHamdy7/Printing-System](https://github.com/AhmedHamdy7/Printing-System)
 
-**Company:** Qeematech
-**Developer:** Mustafa Fahmy
-**Prepared By:** Eng. Mohamed Abdelrahman
-
 
 ## Features
 
@@ -313,21 +309,5 @@ php artisan optimize:clear
 - XSS protection through Blade templating
 - Password hashing using bcrypt
 - Role-based authorization on all sensitive routes
-
----
-
-## Project Information
-
-**GitHub:** [https://github.com/AhmedHamdy7/Printing-System](https://github.com/AhmedHamdy7/Printing-System)
-
-**Company:** Qeematech
-**Developer:** Mustafa Fahmy
-**Prepared By:** Eng. Mohamed Abdelrahman
-
-**License:** Proprietary software developed for Qeematech
-
----
-
-For support or questions, contact: **Eng. Mohamed Abdelrahman**
 
 
